@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="imagenes/log_Mesa de trabajo 1.png">
+    <script src="https://kit.fontawesome.com/d713dc6f76.js" crossorigin="anonymous"></script>
+    <title>Tiendita CTGI</title>
+    
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <!-- Navigation -->
+        <nav class="nav">
+            <div class="logo">TIENDITA</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="productos.html">Productos</a></li>
+                <li><a href="quien.html">Quiénes Somos</a></li>
+            </ul>
+            <a href="regris.html" class="register-btn">Regístrate</a>
+        </nav>
+
+        <!-- Organic shapes -->
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+        <div class="shape shape4"></div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <img src="imagenes/ft_Mesa de trabajo 1.png" alt="">
+        </div>
+    </header>
+
+    <!-- Contact Section -->
+    <section class="contact-section" id="contactanos">
+        <div class="contact-container">
+            <div class="contact-info fade-in">
+                <h2>Contáctanos</h2>
+                <div class="contact-details">
+                    <div class="contact-item">tienditectgi001@gmail.com<i class="fa-solid fa-envelope"></i></div>
+                    <div class="contact-item phone">321 6890185<i class="fa-brands fa-whatsapp"></i></div>
+                    <div class="contact-item social">@tiendita_ctgi <a href="https://www.instagram.com/tiendita_ctgi/?igsh=OW9oazhkbHhxaGI2"><i class="fa-brands fa-instagram"></i></div>
+                    <div class="contact-item ">tienditectgi <a href="https://www.facebook.com/share/18geki2ZAs/"><i class="fa-brands fa-facebook-f"></i></div>
+                </div>
+            </div>
+
+            <div class="team-section fade-in">
+                <h3>Equipo de Trabajo</h3>
+                <ul class="team-list">
+                    <li>Samuel Gallego</li>
+                    <li>Víctor Manuel Izasa</li>
+                    <li>Simón Toro</li>
+                    <li>Isabella Peña</li>
+                    <li>Elia Rodríguez</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>2025 Tiendita CTGI <strong>Todos los Derechos Reservados</strong></p>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Fade in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -100px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Add some interactive hover effects
+        document.querySelectorAll('.team-list li').forEach(item => {
+            item.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(10px)';
+                this.style.transition = 'transform 0.3s ease';
+            });
+            
+            item.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+
+        // Add click effects to contact items
+        document.querySelectorAll('.contact-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.style.animation = 'pulse 0.6s ease';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 600);
+            });
+        });
+    </script>
+</body>
+</html>

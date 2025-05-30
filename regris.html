@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="regris.css">
+    <title>Sistema de Registro</title>
+</head>
+<body>
+    
+    <div class="container">
+        <nav class="nav">
+            <div class="logo">TIENDITA</div>
+            <ul class="nav-links">
+                <li><a href="index.html">Inicio</a></li>
+                <li><a href="productos.html">Productos</a></li>
+            </ul>
+            <a href="regris.html" class="register-btn">Regístrate</a>
+        </nav>
+        <div class="form-header">
+            <h1>Registro</h1>
+            <p>Crea tu cuenta de usuario</p>
+        </div>
+
+        <div id="alert-container"></div>
+
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="nombre">Nombre completo *</label>
+                <input type="text" id="nombre" name="nombre" required>
+                <div class="error-message" id="nombre-error"></div>
+                <div class="success-message" id="nombre-success"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Correo electrónico *</label>
+                <input type="email" id="email" name="email" required>
+                <div class="error-message" id="email-error"></div>
+                <div class="success-message" id="email-success"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="telefono">Teléfono</label>
+                <input type="tel" id="telefono" name="telefono">
+                <div class="error-message" id="telefono-error"></div>
+                <div class="success-message" id="telefono-success"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="edad">Edad *</label>
+                <input type="number" id="edad" name="edad" min="18" max="100" required>
+                <div class="error-message" id="edad-error"></div>
+                <div class="success-message" id="edad-success"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="genero">Género</label>
+                <select id="genero" name="genero">
+                    <option value="">Seleccionar</option>
+                    <option value="masculino">Masculino</option>
+                    <option value="femenino">Femenino</option>
+                    <option value="otro">Otro</option>
+                    <option value="prefiero-no-decir">Prefiero no decir</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña *</label>
+                <input type="password" id="password" name="password" required>
+                <div class="password-strength">
+                    <div class="password-strength-bar" id="password-strength-bar"></div>
+                </div>
+                <div class="error-message" id="password-error"></div>
+                <div class="success-message" id="password-success"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar contraseña *</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+                <div class="error-message" id="confirmPassword-error"></div>
+                <div class="success-message" id="confirmPassword-success"></div>
+            </div>
+
+            <button type="submit" class="btn-register" id="btn-register">
+                Crear cuenta
+            </button>
+        </form>
+
+        <div class="users-list" id="users-list" style="display: none;">
+            <h3>Usuarios registrados</h3>
+            <div id="users-container"></div>
+        </div>
+    </div>
+
+    <script>
+        // Array para almacenar usuarios registrados
+        let usuarios = [];
+
+        // Referencias a elementos del DOM
+        const form = document.getElementById('registerForm');
+        const alertContainer = document.getElementById('alert-container');
+        const usersList = document.getElementById('users-list');
+        const usersContainer = document.getElementById('users-container');
+
+        // Validación en tiempo real
+        const campos = ['nombre', 'email', 'telefono', 'edad', 'password', 'confirmPassword'];
+        
+        campos.forEach(campo => {
+            const input = document.getElementById(campo);
+            input.addEventListener('input', () => validarCampo(campo));
+            input.addEventListener('blur', () => validarCampo(campo));
+        });
+
+        // Validación de fuerza de contraseña
+        document.getElementById('password').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('password-strength-bar');
+            const strength = calcularFuerzaPassword(password);
+            
+            strengthBar.className = 'password-strength-bar';
+            if (password.length > 0) {
+                if (strength < 3) {
+                    strengthBar.classList.add('strength-weak');
+                } else if (strength < 5) {
+                    strengthBar.classList.add('strength-medium');
+                } else {
+                    strengthBar.classList.add('strength-strong');
+                }
+            }
+        });
+
+        function calcularFuerzaPassword(password) {
+            let fuerza = 0;
+            if (password.length >= 8) fuerza++;
+            if (/[a-z]/.test(password)) fuerza++;
+            if (/[A-Z]/.test(password)) fuerza++;
+            if (/[0-9]/.test(password)) fuerza++;
+            if (/[^A-Za-z0-9]/.test(password)) fuerza++;
+            return fuerza;
+        }
+
+        function validarCampo(campo) {
+            const input = document.getElementById(campo);
+            const value = input.value.trim();
+            const errorElement = document.getElementById(campo + '-error');
+            const successElement = document.getElementById(campo + '-success');
+            
+            let esValido = true;
+            let mensaje = '';
+
+            switch(campo) {
+                case 'nombre':
+                    if (value.length < 2) {
+                        esValido = false;
+                        mensaje = 'El nombre debe tener al menos 2 caracteres';
+                    } else if (!/^[a-záéíóúñü\s]+$/i.test(value)) {
+                        esValido = false;
+                        mensaje = 'El nombre solo puede contener letras y espacios';
+                    }
+                    break;
+
+                case 'email':
+                    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                    if (!emailRegex.test(value)) {
+                        esValido = false;
+                        mensaje = 'Por favor ingresa un email válido';
+                    } else if (usuarios.some(user => user.email === value)) {
+                        esValido = false;
+                        mensaje = 'Este email ya está registrado';
+                    }
+                    break;
+
+                case 'telefono':
+                    if (value && !/^\d{10}$/.test(value.replace(/[\s-()]/g, ''))) {
+                        esValido = false;
+                        mensaje = 'El teléfono debe tener 10 dígitos';
+                    }
+                    break;
+
+                case 'edad':
+                    const edad = parseInt(value);
+                    if (isNaN(edad) || edad < 18 || edad > 100) {
+                        esValido = false;
+                        mensaje = 'Debes tener entre 18 y 100 años';
+                    }
+                    break;
+
+                case 'password':
+                    if (value.length < 8) {
+                        esValido = false;
+                        mensaje = 'La contraseña debe tener al menos 8 caracteres';
+                    } else if (calcularFuerzaPassword(value) < 3) {
+                        esValido = false;
+                        mensaje = 'La contraseña es muy débil. Incluye mayúsculas, números y símbolos';
+                    }
+                    break;
+
+                case 'confirmPassword':
+                    const password = document.getElementById('password').value;
+                    if (value !== password) {
+                        esValido = false;
+                        mensaje = 'Las contraseñas no coinciden';
+                    }
+                    break;
+            }
+
+            // Mostrar resultado de validación
+            if (esValido && value) {
+                input.classList.remove('error');
+                input.classList.add('success');
+                errorElement.style.display = 'none';
+                successElement.textContent = '✓ Válido';
+                successElement.style.display = 'block';
+            } else if (!esValido) {
+                input.classList.remove('success');
+                input.classList.add('error');
+                successElement.style.display = 'none';
+                errorElement.textContent = mensaje;
+                errorElement.style.display = 'block';
+            } else {
+                input.classList.remove('error', 'success');
+                errorElement.style.display = 'none';
+                successElement.style.display = 'none';
+            }
+
+            return esValido;
+        }
+
+        function validarFormulario() {
+            let formularioValido = true;
+            
+            campos.forEach(campo => {
+                const input = document.getElementById(campo);
+                if (input.hasAttribute('required') && !input.value.trim()) {
+                    formularioValido = false;
+                }
+                if (!validarCampo(campo)) {
+                    formularioValido = false;
+                }
+            });
+
+            return formularioValido;
+        }
+
+        function mostrarAlerta(mensaje, tipo) {
+            alertContainer.innerHTML = `
+                <div class="alert alert-${tipo}">
+                    ${mensaje}
+                </div>
+            `;
+            
+            setTimeout(() => {
+                alertContainer.innerHTML = '';
+            }, 5000);
+        }
+
+        function registrarUsuario(datosUsuario) {
+            // Generar ID único
+            const id = Date.now() + Math.random();
+            
+            const nuevoUsuario = {
+                id: id,
+                ...datosUsuario,
+                fechaRegistro: new Date().toLocaleString('es-ES')
+            };
+
+            usuarios.push(nuevoUsuario);
+            actualizarListaUsuarios();
+            
+            return nuevoUsuario;
+        }
+
+        function actualizarListaUsuarios() {
+            if (usuarios.length === 0) {
+                usersList.style.display = 'none';
+                return;
+            }
+
+            usersList.style.display = 'block';
+            usersContainer.innerHTML = '';
+
+            usuarios.forEach(usuario => {
+                const userCard = document.createElement('div');
+                userCard.className = 'user-card';
+                userCard.innerHTML = `
+                    <h4>${usuario.nombre}</h4>
+                    <p><strong>Email:</strong> ${usuario.email}</p>
+                    <p><strong>Teléfono:</strong> ${usuario.telefono || 'No proporcionado'}</p>
+                    <p><strong>Edad:</strong> ${usuario.edad} años</p>
+                    <p><strong>Género:</strong> ${usuario.genero || 'No especificado'}</p>
+                    <p><strong>Registrado:</strong> ${usuario.fechaRegistro}</p>
+                `;
+                usersContainer.appendChild(userCard);
+            });
+        }
+
+        // Manejar envío del formulario
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            if (!validarFormulario()) {
+                mostrarAlerta('Por favor corrige los errores en el formulario', 'error');
+                return;
+            }
+
+            // Obtener datos del formulario
+            const formData = new FormData(form);
+            const datosUsuario = {
+                nombre: formData.get('nombre').trim(),
+                email: formData.get('email').trim(),
+                telefono: formData.get('telefono').trim(),
+                edad: parseInt(formData.get('edad')),
+                genero: formData.get('genero'),
+                password: formData.get('password') // En producción, esto debería ser hasheado
+            };
+
+            try {
+                const usuarioRegistrado = registrarUsuario(datosUsuario);
+                mostrarAlerta(`¡Registro exitoso! Bienvenido ${usuarioRegistrado.nombre}`, 'success');
+                
+                // Limpiar formulario
+                form.reset();
+                
+                // Limpiar clases de validación
+                campos.forEach(campo => {
+                    const input = document.getElementById(campo);
+                    input.classList.remove('success', 'error');
+                    document.getElementById(campo + '-error').style.display = 'none';
+                    document.getElementById(campo + '-success').style.display = 'none';
+                });
+
+                // Limpiar barra de fuerza de contraseña
+                document.getElementById('password-strength-bar').className = 'password-strength-bar';
+                
+            } catch (error) {
+                mostrarAlerta('Error al registrar usuario. Por favor intenta nuevamente.', 'error');
+                console.error('Error:', error);
+            }
+        });
+
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Sistema de registro inicializado');
+        });
+    </script>
+</body>
+</html>
